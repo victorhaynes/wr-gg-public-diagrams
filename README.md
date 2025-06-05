@@ -1,1 +1,1 @@
-# wr-gg-public-diagrams
+![Alt text](wr.gg-architecture-diagram.png)
