@@ -1,4 +1,4 @@
-title WINRATES.GG AWS Architecture Diagram 
+title WINRATES.GG AWS Architecture Diagram
 
 // Top-level routing and CDN
 Route 53 [icon: aws-route-53] {
@@ -49,10 +49,8 @@ Region [icon: aws-region, label: "REGION: us-east-2"] {
             FastAPI [icon: fastapi, label: "FastAPI (Python)"]
             Redis [icon: redis]
             New Destiny [icon: library, label: "NEW DESTINY: open source rate limiting package created by Victor Haynes"]
-            EBS2 [icon: aws-elastic-block-store, label: "EBS for DB"] {
-              PostgreSQL [icon: postgresql]
-
-            }
+            PostgreSQL [icon: postgresql]
+            CloudWatch Agent [icon: agent]
           }
         }
       }
@@ -71,15 +69,17 @@ Region [icon: aws-region, label: "REGION: us-east-2"] {
       }
   
     }
-    EBS1 [icon: aws-elastic-block-store, label: "EBS Root"]
   }
+  EBS1 [icon: aws-elastic-block-store, label: "EBS Root Volume"]
+  EBS2 [icon: aws-elastic-block-store, label: "EBS DB Storage"] 
+
   EventBridge [icon: aws-eventbridge]
   SNS [icon: aws-sns]
   Lambda [icon:aws-lambda, label:"Lambda (x13)"]
   CloudWatch Logs [icon: aws-cloudwatch-logs]
   S31 (Static Failover Site) [icon: aws-s3]
   S32 [icon: aws-s3, label: "S3 (IMAGE HOSTING)"]
-
+  Custom CloudWatch Dashboard [icon: aws-cloudwatch]
 }
 
 
@@ -118,7 +118,8 @@ EventBridge > SNS: 6X PER DAY CRON
 SNS < Lambda: LAMBDA SUBSCRIBES
 Lambda > S32: UPSERTS IMAGES
 Lambda > PostgreSQL: UPSERTS RECORDS
-Lambda > CloudWatch Logs:  LOGS 
+Lambda > CloudWatch Logs:  LOGS
+PostgreSQL <> EBS2
 
 
 // Other
@@ -129,5 +130,7 @@ IGW <> Client1
 Route Table1 <> NACL1
 Route Table2 <> NACL2
 Route Table1 > IGW
+CloudWatch Agent <> Custom CloudWatch Dashboard
+
 
 
