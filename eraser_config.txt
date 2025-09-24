@@ -1,0 +1,133 @@
+title WINRATES.GG AWS Architecture Diagram 
+
+// Top-level routing and CDN
+Route 53 [icon: aws-route-53] {
+  winrates.gg (Public Hosted Zone) [icon: aws-route-53-hosted-zone] {
+    Record1 [icon: aws-route-53, label: "apex: A/Alias"]
+    Record2 [icon: aws-route-53, label: "apex: AAAA/Alias"]
+    Record3 [icon: aws-route-53, label: "www. (IPv4) alias"]
+    Record4 [icon: aws-route-53, label: "www. (IPv6) alias"]
+  }
+}
+
+CloudFront Web [icon: aws-cloudfront, label: "CloudFront (Web Serving)"] {
+  Behaviors [label: "Behaviors: redirect HTTP to HTTPs"] {
+    Origin Group [icon: ] {
+      Primary Origin [icon: aws-cloudfront]
+      Secondary Origin [icon: aws-cloudfront]
+    
+    }
+  }
+}
+
+
+
+Region [icon: aws-region, label: "REGION: us-east-2"] {
+  // Network and compute infrastructure
+  VPC [icon: aws-vpc] {
+    IGW [icon: aws-internet-gateway, label: "IGW"]
+    Route Table1 [icon: aws-route-table, label: 
+    "Route Table"] {
+      Route1 [icon: aws-route-table, label: "Destination ::/0 via IGW"]
+      Route2 [icon: aws-route-table, label: "Destination 0.0.0.0/0 via IGW"]
+      Route3 [icon: aws-route-table, label: "Destination 10.0.0.0/16 via local"]
+    }
+
+    NACL1 [icon: aws-nacl, label: "NACL"] {
+      NACL Rule1 [icon: aws-nacl, label: "Allow Inbound *"]
+      NACL Rule2 [icon: aws-nacl, label: "Allow Outbound *"]
+      Public Subnet [icon: aws-subnet-public, label: "Public Subnet"] {
+        Security Groups [icon: aws-security-group] {
+          SG1 [icon: aws-security-group, label: "Allow Inbound */443/TCP"]
+          SG2 [icon: aws-security-group, label: "Allow Inbound */80/TCP"]
+          SG3 [icon: aws-security-group, label: "Sensitive Inbound Rules"]
+          SG4 [icon: aws-security-group, label: "Allow Outbound *"]
+          EC2 Host [icon: aws-ec2, label: "EC2 (Docker + PostgreSQL)"] {
+            Docker [icon: docker]
+            React [icon: react]
+            Nginx [icon: nginx]
+            FastAPI [icon: fastapi, label: "FastAPI (Python)"]
+            Redis [icon: redis]
+            New Destiny [icon: library, label: "NEW DESTINY: open source rate limiting package created by Victor Haynes"]
+            EBS2 [icon: aws-elastic-block-store, label: "EBS for DB"] {
+              PostgreSQL [icon: postgresql]
+
+            }
+          }
+        }
+      }
+    }
+
+
+    Route Table2 [icon: aws-route-table, label: 
+    "Route Table"] {
+      Route4 [icon: aws-route-table, label: "Destination 10.0.0.0/16 via local"]
+    }
+
+    NACL2 [icon: aws-nacl, label: "NACL"] {
+      NACL Rule3 [icon: aws-nacl, label: "Allow Inbound *"]
+      NACL Rule4 [icon: aws-nacl, label: "Allow Outbound *"]
+      Private Subnet [icon: aws-subnet-private, label: "Private Subnet"] {
+      }
+  
+    }
+    EBS1 [icon: aws-elastic-block-store, label: "EBS Root"]
+  }
+  EventBridge [icon: aws-eventbridge]
+  SNS [icon: aws-sns]
+  Lambda [icon:aws-lambda, label:"Lambda (x13)"]
+  CloudWatch Logs [icon: aws-cloudwatch-logs]
+  S31 (Static Failover Site) [icon: aws-s3]
+  S32 [icon: aws-s3, label: "S3 (IMAGE HOSTING)"]
+
+}
+
+
+CloudFront s3 [icon: aws-cloudfront]
+S32 <> CloudFront s3
+Client2 [icon: browser, label: "Client"]
+Client2 <> CloudFront s3
+
+// Connections
+
+// Docker stack on EC2
+Docker > React
+Docker > Nginx
+Docker > FastAPI
+Docker > Redis
+EC2 Host <> EBS1
+
+
+// New Destiny
+FastAPI <> New Destiny
+Redis <> New Destiny
+
+// Route53
+Certificate Manager [icon: aws-certificate-manager]
+Record3 > Record1
+Record4 > Record2
+Record1 > CloudFront Web
+Record2 > CloudFront Web
+CloudFront Web <> Certificate Manager: SSL/TLS Cert
+
+Primary Origin > Security Groups
+Secondary Origin > S31 (Static Failover Site)
+
+// SNS is present but not used
+EventBridge > SNS: 6X PER DAY CRON
+SNS < Lambda: LAMBDA SUBSCRIBES
+Lambda > S32: UPSERTS IMAGES
+Lambda > PostgreSQL: UPSERTS RECORDS
+Lambda > CloudWatch Logs:  LOGS 
+
+
+// Other
+Client1 [icon: browser, label: "Client"]
+Riot API [icon: gamepad]
+Riot API <> IGW
+IGW <> Client1
+Route Table1 <> NACL1
+Route Table2 <> NACL2
+Route Table1 > IGW
+
+
