@@ -1,5 +1,5 @@
 ## AWS Architecture Diagram
-![AWS Architecture Diagram](diagram-export-9-24-2025-3_59_44-PM.svg)
+![AWS Architecture Diagram](diagram-export-10-31-2025-11_47_16-AM.svg)
 
 ## React Client Hierarchy Diagram
 Open image in new tab to expand & zoom in:
